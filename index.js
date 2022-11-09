@@ -15,12 +15,11 @@ app.get('/', (req, res) => {
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.8gaczek.mongodb.net/?retryWrites=true&w=majority`
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-console.log(uri)
 
 async function run(){
 try{
-const serviceCollection = client.db('serviceReviewAssign').collection('services')
-
+const serviceCollection = client.db('serviceReviewAssign').collection('services');
+const reviewCollection = client.db('serviceReviewAssign').collection('reviews');
 
 app.get('/limitedservices', async(req, res)=>{
   const query = {}
@@ -43,6 +42,27 @@ app.get('/services/:id', async(req, res)=>{
   res.send(service);
 })
 
+//review api
+
+app.get('/reviews', async (req, res) => {
+  let query = {};
+  
+  if (req.query.email) {
+      query = {
+          email: req.query.email
+      }
+  }
+  const cursor = reviewCollection.find(query);
+  const reviews = await cursor.toArray();
+  res.send(reviews);
+});
+
+app.post('/reviews', async(req, res) =>{
+  const review = req.body;
+  const result = await reviewCollection.insertOne(review);
+  res.send(result)
+})
+
 }finally{
 
 }
@@ -50,5 +70,5 @@ app.get('/services/:id', async(req, res)=>{
 
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`raning on port ${port}`)
 })
