@@ -12,7 +12,6 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-//const uri = 'mongodb://localhost:27017'
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.8gaczek.mongodb.net/?retryWrites=true&w=majority`
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
@@ -21,6 +20,8 @@ async function run() {
     const serviceCollection = client.db('serviceReviewAssign').collection('services');
     const reviewCollection = client.db('serviceReviewAssign').collection('reviews');
 
+
+    // data get
     app.get('/limitedservices', async (req, res) => {
       const query = {}
       const cursor = serviceCollection.find(query);
@@ -42,10 +43,9 @@ async function run() {
       res.send(service);
     })
 
-    //review api
+    //review api with email base
     app.get('/reviews', async (req, res) => {
       let query = {};
-
       if (req.query.email) {
         query = {
           email: req.query.email
@@ -56,7 +56,7 @@ async function run() {
       res.send(reviews);
     });
 
-    
+//get with id
     app.get('/review/:id', async (req, res) => {
       const { id } = req.params;
       const query = { _id: ObjectId(id) }
@@ -64,6 +64,8 @@ async function run() {
       console.log(result)
       res.send(result)
     });
+
+    //get with id
     app.get('/reviews/:id', async (req, res) => {
       const { id } = req.params;
       const query = { service: (id) }
@@ -72,6 +74,7 @@ async function run() {
       res.send(result)
     });
 
+//post method
     app.post('/reviews', async (req, res) => {
       const review = req.body;
       const result = await reviewCollection.insertOne(review);
@@ -84,7 +87,7 @@ async function run() {
       res.send(result)
     })
 
-    //delete review
+    //delete method
     app.delete('/reviews/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) }
@@ -93,7 +96,7 @@ async function run() {
       res.send(result)
     })
 
-    //update
+    //update || patch
     app.patch('/review/:id', async (req, res) => {
       const { id } = req.params;
       const result = await reviewCollection.updateOne({ _id: ObjectId(id) }, { $set: req.body });
@@ -117,5 +120,5 @@ async function run() {
 
 
 app.listen(port, () => {
-  console.log(`raning on port ${port}`)
+  console.log(`running on port ${port}`)
 })
